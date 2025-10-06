@@ -89,7 +89,7 @@ const SignUpScreen = () => {
 
   const handleNavigateToSignIn = () => {
     // Implement navigation to sign in screen
-    navigation.navigate('SignIn');
+    navigation.goBack()
     console.log('Navigation stack history:', navigation.getState());
 
   };
