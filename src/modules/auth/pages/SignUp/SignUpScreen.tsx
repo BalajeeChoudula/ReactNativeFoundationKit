@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,11 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
+import { signupRequest,SignupState } from '../../../../redux/store/slices/auth/signupSlice';
+import { useSelector} from 'react-redux';
 
 const SignUpScreen = () => {
   const [formData, setFormData] = useState({
@@ -25,9 +28,10 @@ const SignUpScreen = () => {
     password: '',
     confirmPassword: '',
   });
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-
+  const signupState:SignupState = useSelector((state: any) => state.signup);
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -82,8 +86,7 @@ const SignUpScreen = () => {
 
   const handleSignUp = () => {
     if (validateForm()) {
-      // Implement sign up logic here
-      console.log('Sign up with:', formData);
+      dispatch({type: signupRequest.type, payload: { email: formData.email, password: formData.password }});
     }
   };
 
@@ -93,6 +96,12 @@ const SignUpScreen = () => {
     console.log('Navigation stack history:', navigation.getState());
 
   };
+
+  useEffect(() => {
+    if (signupState.success) {
+      navigation.navigate('SignIn' as never);
+    }
+  }, [signupState.success]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -179,9 +188,9 @@ const SignUpScreen = () => {
               I accept the{' '}
               <Text style={styles.termsLink}>Terms of Service</Text> and{' '}
               <Text style={styles.termsLink}>Privacy Policy</Text>
+              { String(signupState.success)}
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[
               styles.signUpButton,

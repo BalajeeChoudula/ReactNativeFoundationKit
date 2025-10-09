@@ -1,12 +1,10 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
-
-// Action Types
-const SIGN_UP_REQUEST = 'SIGN_UP_REQUEST';
-const SIGN_UP_SUCCESS = 'SIGN_UP_SUCCESS';
-const SIGN_UP_FAILURE = 'SIGN_UP_FAILURE';
+import { signupRequest, signupSuccess, signupFailure } from '../../store/slices/auth/signupSlice';
+import { PayloadAction } from '@reduxjs/toolkit';
 
 // Mock API function
 function mockSignUpApi(payload: { email: string; password: string }) {
+    console.log('API called with:', payload);
     return new Promise<{ userId: string }>((resolve, reject) => {
         setTimeout(() => {
             if (payload.email && payload.password) {
@@ -14,21 +12,21 @@ function mockSignUpApi(payload: { email: string; password: string }) {
             } else {
                 reject(new Error('Invalid signup data'));
             }
-        }, 1000);
+        }, 2000);
     });
 }
 
 // Saga Worker
-function* signUpSaga(action: { type: string; payload: { email: string; password: string } }) {
+function* signUpSaga(action: PayloadAction<{ email: string; password: string }>) {
     try {
         const response: { userId: string } = yield call(mockSignUpApi, action.payload);
-        yield put({ type: SIGN_UP_SUCCESS, payload: response });
+        yield put(signupSuccess());
     } catch (error: any) {
-        yield put({ type: SIGN_UP_FAILURE, payload: error.message });
+        yield put(signupFailure(error.message));
     }
 }
 
 // Saga Watcher
 export default function* watchSignUpSaga() {
-    yield takeLatest(SIGN_UP_REQUEST, signUpSaga);
+    yield takeLatest(signupRequest.type, signUpSaga);
 }
